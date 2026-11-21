@@ -1,0 +1,9 @@
+Setup step,Command or file,Expected output,Troubleshooting
+1. Verify Node.js,node -v,v22.5.0 or higher (v24.x tested),Ensure Node is installed and on system PATH
+2. Seed Database,npm run seed,Successfully seeded 3 sessions from CSV,Check data/sessions.csv exists
+3. Run Test Suite,npm test,14 Passed 0 Failed,Ensure port 3333 is free
+4. Run Concurrency Stress Test,npm run test:concurrency,CONCURRENCY TEST PASSED (2 pass 8 blocked),Ensure port 3334 is free
+5. Start Server,npm start,StudySwap Server running at http://localhost:3000,Change PORT env var if 3000 is occupied
+6. Open Web UI,Open http://localhost:3000 in browser,Interactive StudySwap dashboard loaded,Check server terminal is active
+7. Reset Database,npm run reset,Database reset to clean initial state,Restores seed data cleanly
+

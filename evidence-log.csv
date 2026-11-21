@@ -1,0 +1,13 @@
+Requirement or test ID,Given or starting state,Action,Expected result,Actual result,Evidence file,Pass fail or not run,Next action
+TEST-01,Clean install,Run GET /health,HTTP 200 with status ok and sqlite connected,HTTP 200 {"status":"ok","uptime_seconds":0,"database":"sqlite_connected"},test/test-suite.js,Pass,Proceed to seed verification
+TEST-02,Seeded database,Run GET /sessions,HTTP 200 with 3 sessions (S1:3 S2:2 S3:4),HTTP 200 with 3 sessions and accurate available_places,test/test-suite.js,Pass,Proceed to booking
+TEST-03,Session S1 capacity 3,POST /bookings for owl1 owl2 owl3,HTTP 201 Created for all 3 bookings (S1 now full),HTTP 201 Created x3 booked_count=3 available_places=0,test/test-suite.js,Pass,Proceed to overbooking test
+TEST-04-CASE-1,Session S1 capacity 3 with 3 confirmed bookings,POST /bookings for owl42 on S1,HTTP 409 Conflict with session_full error,HTTP 409 {"error":"session_full","message":"This session has no places left."},test/test-suite.js,Pass,Verify DB count unchanged
+TEST-05-STRICT-COUNT,Session S1 rejected 4th booking,SELECT count(*) FROM bookings WHERE sessionId='S1' AND status='confirmed',Strictly returns 3,Query returns exactly 3,test/test-suite.js,Pass,Proceed to Case 2
+TEST-06-CASE-2,Session S999 does not exist,POST /bookings for owl42 on S999,HTTP 404 Not Found with session_not_found error,HTTP 404 {"error":"session_not_found","message":"Session with id 'S999' was not found."},test/test-suite.js,Pass,Proceed to Case 3
+TEST-07-CASE-3,Alias py_learner has confirmed booking on S3,POST /bookings for py_learner on S3 again,HTTP 409 Conflict with duplicate_booking error,HTTP 409 {"error":"duplicate_booking","message":"Alias 'py_learner' already has an active booking..."},test/test-suite.js,Pass,Proceed to cancellation test
+TEST-08-CYCLE-CANCEL,Session S1 is full (3/3),POST /bookings/bkg_id/cancel for booking 1,HTTP 200 OK status set to cancelled and place released,HTTP 200 status='cancelled' available_places=1,test/test-suite.js,Pass,Proceed to re-booking test
+TEST-09-CYCLE-REBOOK,Session S1 has 1 place freed after cancellation,POST /bookings for owl42 on S1,HTTP 201 Created booking succeeds,HTTP 201 Created id=bkg_xxx status='confirmed',test/test-suite.js,Pass,Complete lifecycle verified
+TEST-10-CASE-4,Server restarts or DB connection closed,Query SQLite file directly from fresh process,All 4 bookings intact on disk,Verified all records persisted in studyswap.db,test/test-suite.js,Pass,Proceed to concurrency test
+TEST-11-CONCURRENCY,Session S2 capacity 2,Fire 10 simultaneous concurrent POST requests,Exactly 2 succeed (201) and 8 rejected (409),2 succeed with 201 and 8 return 409 DB count remains exactly 2,test/test-concurrency.js,Pass,Document race condition safety
+

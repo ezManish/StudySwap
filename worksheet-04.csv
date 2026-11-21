@@ -1,0 +1,13 @@
+Test ID,Setup,Action,Expected,Actual and evidence
+TC-01,Clean seeded database,GET /health,200 OK status ok,Passed: 200 OK {"status":"ok"}
+TC-02,Clean seeded database,GET /sessions,200 OK 3 sessions,Passed: 200 OK 3 items S1 S2 S3
+TC-03,S1 capacity 3,POST /bookings for owl1 owl2 owl3,201 Created for each,Passed: 3 seats booked on S1
+TC-04,S1 full (3/3),POST /bookings for owl42 on S1 (4th place),409 Conflict session_full,Passed: 409 Conflict {"error":"session_full"}
+TC-05,Post TC-04,Check SQL count on S1,Strictly 3,Passed: count(*) remains strictly 3
+TC-06,Any state,POST /bookings for S999,404 Not Found,Passed: 404 {"error":"session_not_found"}
+TC-07,py_learner booked on S3,POST /bookings duplicate on S3,409 Conflict duplicate_booking,Passed: 409 {"error":"duplicate_booking"}
+TC-08,S1 full,POST /bookings/bkg_id/cancel,200 OK seat released,Passed: status cancelled available_places=1
+TC-09,S1 1 place freed,POST /bookings for owl42 on S1,201 Created,Passed: owl42 successfully booked
+TC-10,Server restarted,Direct query on studyswap.db,Bookings intact,Passed: 4 rows exist in DB file
+TC-11,S2 capacity 2,Fire 10 simultaneous requests,2 pass 8 rejected 409,Passed: 2x 201 Created 8x 409 Conflict
+

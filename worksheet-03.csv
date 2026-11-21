@@ -1,0 +1,9 @@
+Journey step,UI state,API call,Stored change,Expected result
+1. Open application,Shows sessions grid with live spots,GET /sessions,None,All 3 sessions displayed with correct initial capacities
+2. Select session S1,Populates booking form session select,None,None,Form selected to S1 with random alias generated
+3. Submit booking 1 (owl1),Loading button -> success alert,POST /bookings {"sessionId":"S1","alias":"owl1"},Row inserted in bookings status=confirmed,S1 booked_count increments to 1
+4. Submit booking 2 and 3,Success alert -> S1 progress bar 100% full,POST /bookings x2,2 rows inserted in bookings status=confirmed,S1 booked_count=3 available_places=0
+5. Attempt 4th booking (owl42),Error alert: Overbooking Refused,POST /bookings {"sessionId":"S1","alias":"owl42"},None (aborted by SQLite trigger),HTTP 409 Conflict session_full
+6. Click cancel on booking 1,Row status badge updates to 'Released',POST /bookings/:id/cancel,Status updated to cancelled in bookings,S1 booked_count drops to 2 available_places=1
+7. Re-submit booking for owl42,Success alert -> booking confirmed,POST /bookings {"sessionId":"S1","alias":"owl42"},Row inserted in bookings status=confirmed,HTTP 201 Created S1 full again
+

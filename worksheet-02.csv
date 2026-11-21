@@ -1,0 +1,8 @@
+Route and method,Request,Success response,Validation,Error response
+GET /health,No body,200 OK {"status":"ok","database":"sqlite_connected"},None,500 Internal Error
+GET /sessions,No body,200 OK array of sessions with booked_count and available_places,None,500 Internal Error
+GET /sessions/:id,URL param id,200 OK session details and bookings array,Validate session exists,404 Not Found {"error":"session_not_found"}
+POST /bookings,JSON {sessionId alias},201 Created {id sessionId alias status created_at},Validate sessionId alias existence and capacity,400 Bad Request / 404 Not Found / 409 Conflict
+POST /bookings/:id/cancel,URL param id,200 OK {message booking},Validate booking exists (idempotent if already cancelled),404 Not Found {"error":"booking_not_found"}
+POST /reset,No body,200 OK {message sessions},Resets DB and reloads sessions.csv,500 Internal Error
+

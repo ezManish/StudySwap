@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudySwap — Peer Study Sessions</title>
+  <meta name="description" content="StudySwap peer study session booking system with atomic data-layer capacity enforcement. Built for CareerSwami Full-Stack Web Development Project 1.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="theme-light">
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <div class="app-layout">
+    <!-- Minimal Top Bar -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <span class="brand-name">StudySwap</span>
+        <span class="brand-divider">/</span>
+        <span class="brand-label">Session Booking</span>
+      </div>
+
+      <div class="nav-actions">
+        <div class="system-status" id="health-badge">
+          <span class="status-indicator"></span>
+          <span id="health-text" class="status-label">Connecting...</span>
+        </div>
+
+        <button id="theme-toggle-btn" class="nav-btn" title="Toggle theme">
+          <span class="theme-label">Theme</span>
+        </button>
+
+        <button id="specs-modal-btn" class="nav-btn" title="View technical specifications">
+          Specification
+        </button>
+
+        <button id="reset-btn" class="nav-btn nav-btn-danger" title="Reset all data to seed state">
+          Reset DB
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub-header Overview Strip -->
+    <section class="overview-bar">
+      <div class="overview-item">
+        <span class="overview-label">Sessions</span>
+        <span class="overview-val" id="stat-total-sessions">3</span>
+      </div>
+      <div class="overview-separator"></div>
+      <div class="overview-item">
+        <span class="overview-label">Total Capacity</span>
+        <span class="overview-val">9 seats</span>
+      </div>
+      <div class="overview-separator"></div>
+      <div class="overview-item">
+        <span class="overview-label">Booked</span>
+        <span class="overview-val" id="stat-seat-utilization">0 / 9</span>
+      </div>
+      <div class="overview-separator"></div>
+      <div class="overview-item">
+        <span class="overview-label">Available</span>
+        <span class="overview-val" id="stat-available-seats">9 remaining</span>
+      </div>
+      <div class="overview-separator"></div>
+      <div class="overview-item">
+        <span class="overview-label">Capacity Guard</span>
+        <span class="overview-val text-mono">SQLite WAL Trigger</span>
+      </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="content-container">
+      
+      <!-- Top Grid: Sessions + Booking Form -->
+      <div class="grid-two-col">
+        
+        <!-- Section: Study Sessions (Flow 1 & 2) -->
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Study Sessions</h2>
+              <p class="panel-desc">All sessions enforce capacity at the database level.</p>
+            </div>
+            <div class="panel-actions">
+              <div class="segmented-control">
+                <button class="segment-btn active" id="session-filter-all" data-filter="all">All</button>
+                <button class="segment-btn" id="session-filter-available" data-filter="available">Open</button>
+                <button class="segment-btn" id="session-filter-full" data-filter="full">Full</button>
+              </div>
+              <button id="refresh-sessions-btn" class="btn btn-secondary btn-sm">Refresh</button>
+            </div>
+          </div>
+
+          <div class="sessions-list" id="sessions-grid">
+            <div class="empty-state">Loading sessions...</div>
+          </div>
+        </section>
+
+        <!-- Section: Book a Seat (Flow 3) -->
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Book a Place</h2>
+              <p class="panel-desc">Reserve a seat with a fictional alias. No account required.</p>
+            </div>
+          </div>
+
+          <form id="booking-form" class="booking-form" autocomplete="off">
+            <div class="form-field">
+              <label for="session-select" class="form-label">Target Session</label>
+              <select id="session-select" class="form-select" required>
+                <option value="">Select a session...</option>
+              </select>
+              <span class="form-help" id="session-capacity-hint">Select a session to view remaining capacity</span>
+            </div>
+
+            <div class="form-field">
+              <label for="alias-input" class="form-label">Fictional Alias</label>
+              <div class="input-action-group">
+                <input type="text" id="alias-input" class="form-input text-mono" placeholder="e.g. owl42" required maxlength="30" pattern="^[a-zA-Z0-9_\-]+$">
+                <button type="button" id="random-alias-btn" class="btn btn-secondary btn-sm" title="Generate random alias">Random</button>
+              </div>
+              <div class="alias-quick-row">
+                <span class="quick-label">Presets:</span>
+                <button type="button" class="alias-tag" data-alias="owl42">owl42</button>
+                <button type="button" class="alias-tag" data-alias="falcon99">falcon99</button>
+                <button type="button" class="alias-tag" data-alias="badger07">badger07</button>
+                <button type="button" class="alias-tag" data-alias="fox18">fox18</button>
+              </div>
+            </div>
+
+            <div class="form-submit-row">
+              <button type="submit" id="book-submit-btn" class="btn btn-primary">
+                Confirm Booking
+              </button>
+            </div>
+
+            <div id="booking-alert" class="alert-box hidden" role="alert"></div>
+          </form>
+        </section>
+
+      </div>
+
+      <!-- Section: Automated Verification & Invariant Proofs -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Verification & Proof Suite</h2>
+            <p class="panel-desc">Automated evidence runners validating that overbooking cannot occur.</p>
+          </div>
+          <div class="panel-actions">
+            <button id="copy-evidence-btn" class="btn btn-secondary btn-sm" title="Copy results as Markdown">Copy Markdown</button>
+            <button id="clear-results-btn" class="btn btn-secondary btn-sm">Clear Output</button>
+          </div>
+        </div>
+
+        <div class="test-toolbar">
+          <button id="run-worked-example-btn" class="btn btn-secondary btn-sm">
+            Brief Worked Example (S1)
+          </button>
+          <button id="run-concurrency-burst-btn" class="btn btn-secondary btn-sm">
+            5-Way Concurrent Race (S2)
+          </button>
+          <button id="run-duplicate-test-btn" class="btn btn-secondary btn-sm">
+            Double Booking Test (S3)
+          </button>
+          <button id="run-invalid-session-test-btn" class="btn btn-secondary btn-sm">
+            Invalid Session ID (S999)
+          </button>
+        </div>
+
+        <div id="proof-results" class="proof-panel hidden">
+          <div class="proof-summary-bar">
+            <span class="proof-name" id="proof-title">Test Results</span>
+            <span class="proof-desc" id="proof-summary"></span>
+          </div>
+          <div class="table-container">
+            <table class="data-table" id="proof-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Operation</th>
+                  <th style="width: 120px;">Status</th>
+                  <th>Payload</th>
+                  <th style="width: 90px; text-align: right;">Result</th>
+                </tr>
+              </thead>
+              <tbody id="proof-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Current Bookings (Flow 4) -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Bookings Directory</h2>
+            <p class="panel-desc">All bookings persist on disk. Cancelling returns the seat immediately.</p>
+          </div>
+          <div class="panel-actions">
+            <div class="segmented-control">
+              <button class="segment-btn active" id="booking-filter-all" data-filter="all">All</button>
+              <button class="segment-btn" id="booking-filter-active" data-filter="active">Active</button>
+              <button class="segment-btn" id="booking-filter-cancelled" data-filter="cancelled">Cancelled</button>
+            </div>
+            <input type="text" id="booking-search-input" placeholder="Search by alias or ID..." class="form-input form-input-sm search-box">
+            <button id="refresh-bookings-btn" class="btn btn-secondary btn-sm">Refresh</button>
+            <button id="export-csv-btn" class="btn btn-secondary btn-sm">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="bookings-table">
+            <thead>
+              <tr>
+                <th style="width: 150px;">Booking ID</th>
+                <th>Session</th>
+                <th>Alias</th>
+                <th style="width: 110px;">Status</th>
+                <th>Created At</th>
+                <th style="width: 100px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-tbody">
+              <tr><td colspan="6" class="empty-cell">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section: Low-profile API Traffic Inspector -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">HTTP Inspector</h2>
+            <p class="panel-desc">Live request and response log for client audits.</p>
+          </div>
+          <div class="panel-actions">
+            <div class="segmented-control">
+              <button class="segment-btn active" id="log-filter-all" data-filter="all">All</button>
+              <button class="segment-btn" id="log-filter-success" data-filter="2xx">2xx</button>
+              <button class="segment-btn" id="log-filter-error" data-filter="4xx">4xx</button>
+            </div>
+            <span class="log-count" id="log-counter">0 events</span>
+            <button id="clear-log-btn" class="btn btn-secondary btn-sm">Clear</button>
+          </div>
+        </div>
+
+        <div class="console-box" id="log-console">
+          <div class="console-line text-muted">[System ready: SQLite file-backed connection in WAL mode]</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Clean Minimal Footer -->
+    <footer class="app-footer">
+      <span>StudySwap · CareerSwami Full-Stack Web Development Project 1</span>
+      <span class="footer-meta">Persisted in SQLite · Zero Overbooking Architecture</span>
+    </footer>
+  </div>
+
+  <!-- Modal 1: Session Details Modal (Flow 2) -->
+  <div id="session-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="pill-id" id="detail-session-id">S1</span>
+          <h3 id="detail-modal-title" class="modal-title">Session Details</h3>
+        </div>
+        <button class="modal-close" id="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="meta-data-grid">
+          <div class="meta-item">
+            <span class="meta-label">Schedule</span>
+            <span class="meta-value" id="detail-schedule">Mon 16:00</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Capacity</span>
+            <span class="meta-value" id="detail-capacity">3 seats</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Confirmed</span>
+            <span class="meta-value" id="detail-confirmed-count">0</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Remaining</span>
+            <span class="meta-value text-mono" id="detail-available-places">3</span>
+          </div>
+        </div>
+
+        <!-- Seats allocation row -->
+        <div class="detail-block">
+          <div class="detail-heading">Seat Allocation</div>
+          <div class="seat-slots-row" id="detail-seats-map"></div>
+        </div>
+
+        <!-- Confirmed attendees list -->
+        <div class="detail-block">
+          <div class="detail-heading">Confirmed Attendees (<span id="detail-attendee-count">0</span>)</div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alias</th>
+                  <th>Booking ID</th>
+                  <th>Time</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="detail-attendees-tbody">
+                <tr><td colspan="4" class="empty-cell">No attendees booked.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- In-Modal Quick Book -->
+        <div class="detail-block detail-quick-book" id="detail-booking-box">
+          <div class="detail-heading">Book this Session</div>
+          <form id="detail-booking-form" class="inline-form">
+            <input type="text" id="detail-alias-input" class="form-input text-mono" placeholder="Alias (e.g. owl42)" required maxlength="30" pattern="^[a-zA-Z0-9_\-]+$">
+            <button type="button" id="detail-random-alias-btn" class="btn btn-secondary btn-sm">Random</button>
+            <button type="submit" id="detail-submit-btn" class="btn btn-primary btn-sm">Reserve Seat</button>
+          </form>
+          <div id="detail-alert" class="alert-box hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Specifications Modal -->
+  <div id="specs-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="specs-modal-title">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 id="specs-modal-title" class="modal-title">Specification & Constraints</h3>
+        <button class="modal-close" id="specs-modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="spec-section">
+          <h4 class="spec-heading">1. Core Invariant</h4>
+          <p class="spec-text">The 4th booking on a 3-place session must always be rejected with HTTP <code>409 Conflict</code>. Capacity is enforced in SQLite via an atomic <code>BEFORE INSERT</code> trigger.</p>
+        </div>
+
+        <div class="spec-section">
+          <h4 class="spec-heading">2. Required Flows</h4>
+          <ul class="spec-list">
+            <li><code>GET /sessions</code>: Lists sessions with current occupancy and available places.</li>
+            <li><code>GET /sessions/:id</code>: Returns session detail with active booking records.</li>
+            <li><code>POST /bookings</code>: Books a place atomically with <code>{ sessionId, alias }</code>.</li>
+            <li><code>POST /bookings/:id/cancel</code>: Cancels booking and returns seat to pool.</li>
+          </ul>
+        </div>
+
+        <div class="spec-section">
+          <h4 class="spec-heading">3. The Four Test Cases</h4>
+          <ul class="spec-list">
+            <li><strong>Case 1 (Overbooking):</strong> 4th booking on 3-place session returns <code>409 Conflict</code>.</li>
+            <li><strong>Case 2 (Invalid Session):</strong> Booking non-existent session returns <code>404 Not Found</code>.</li>
+            <li><strong>Case 3 (Double Booking):</strong> An alias cannot book the same session twice (<code>409 Conflict</code>).</li>
+            <li><strong>Case 4 (Restart Persistence):</strong> SQLite file backed with WAL mode; data survives process restart.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

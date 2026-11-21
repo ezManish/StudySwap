@@ -1,0 +1,24 @@
+File or URL,Purpose,Open or run steps,Version,Access checked
+README.md,Project setup and reproduction instructions,Open in Markdown viewer,1.0.0,Yes
+package.json,Project scripts and Node runtime configuration,npm start / npm test,1.0.0,Yes
+src/server.js,HTTP server and REST routing implementation,node src/server.js,1.0.0,Yes
+src/db.js,SQLite database schema triggers and atomic operations,node src/db.js,1.0.0,Yes
+src/seed.js,Seed database from CSV,npm run seed,1.0.0,Yes
+src/reset.js,Reset database to clean initial state,npm run reset,1.0.0,Yes
+data/sessions.csv,Seed dataset for initial study sessions,Open in CSV editor,1.0.0,Yes
+public/index.html,Single-page web application frontend,Open http://localhost:3000 in browser,1.0.0,Yes
+public/style.css,Responsive stylesheet for web interface,Loaded by index.html,1.0.0,Yes
+public/app.js,Frontend application logic and proof tester,Loaded by index.html,1.0.0,Yes
+docs/API_CONTRACT.md,Formal REST API specification,Open in Markdown viewer,1.0.0,Yes
+docs/ARCHITECTURE.md,Data architecture and concurrency model,Open in Markdown viewer,1.0.0,Yes
+docs/WORKBOOK_COMPLETED_ANSWERS.md,Pre-filled answers for student workbook docx,Open in Markdown viewer,1.0.0,Yes
+test/test-suite.js,Automated validation suite covering all 4 cases,npm test,1.0.0,Yes
+test/test-concurrency.js,Concurrency stress test proving race condition safety,npm run test:concurrency,1.0.0,Yes
+evidence-log.csv,Captured test results and proof log,Open in CSV editor,1.0.0,Yes
+worksheet-01.csv,Checkpoint 01: System stories and data model,Open in CSV editor,1.0.0,Yes
+worksheet-02.csv,Checkpoint 02: API contract and schema specification,Open in CSV editor,1.0.0,Yes
+worksheet-03.csv,Checkpoint 03: Core journey mapping and state transitions,Open in CSV editor,1.0.0,Yes
+worksheet-04.csv,Checkpoint 04: Boundary tests and failure cases,Open in CSV editor,1.0.0,Yes
+worksheet-05.csv,Checkpoint 05: Bug log and robustness improvements,Open in CSV editor,1.0.0,Yes
+worksheet-06.csv,Checkpoint 06: Reproducible delivery checklist,Open in CSV editor,1.0.0,Yes
+

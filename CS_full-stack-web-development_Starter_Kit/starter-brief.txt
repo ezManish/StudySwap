@@ -1,0 +1,1 @@
+Sessions:S1 Algebra,Mon16:00,capacity3;S2 Resume review,Tue17:00,capacity2;S3 Python,Wed16:00,capacity4. Fields:id,title,start,capacity. Booking:id,sessionId,alias,status. Flows:list,details,book,cancel. Fictional aliases,no payments/login/public hosting. Prevent overbooking/invalid bookings;persist after restart.

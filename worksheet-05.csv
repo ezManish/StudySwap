@@ -1,0 +1,7 @@
+Bug ID,Cause,Fix,Regression test,Remaining risk
+BUG-01,Application-level if statement in naive code causes race condition,Enforce capacity via SQLite BEFORE INSERT trigger and BEGIN IMMEDIATE,test/test-concurrency.js firing 10 simultaneous requests,Zero risk: database engine rejects invalid writes
+BUG-02,Same alias booking twice when seats are open,Created partial unique index idx_unique_active_booking WHERE status = 'confirmed',Attempt duplicate booking with same alias on S3,Zero risk: SQLite enforces uniqueness
+BUG-03,Orphaned booking if session does not exist,Foreign key constraint on sessionId and pre-validation check,POST /bookings with non-existent session ID,Zero risk: Foreign key constraint blocks invalid IDs
+BUG-04,Capacity leak if cancellation is not atomic or tracked,Booked count only counts status='confirmed' and cancellation updates status in transaction,Full cycle test: book -> cancel -> rebook,Zero risk: fully verified in test suite
+BUG-05,Data loss on server restart with in-memory storage,Persistent SQLite disk file with WAL mode,Server restart persistence test in test-suite.js,Zero risk: file exists on disk and survives restart
+

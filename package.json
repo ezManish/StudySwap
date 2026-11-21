@@ -1,0 +1,24 @@
+{
+  "name": "studyswap",
+  "version": "1.0.0",
+  "description": "CareerSwami Full-Stack Web Development Project 1 - StudySwap",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node src/seed.js",
+    "reset": "node src/reset.js",
+    "test": "node test/test-suite.js",
+    "test:concurrency": "node test/test-concurrency.js"
+  },
+  "keywords": [
+    "studyswap",
+    "sqlite",
+    "concurrency",
+    "atomic-booking"
+  ],
+  "author": "Internship Learner",
+  "license": "ISC",
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

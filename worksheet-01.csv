@@ -1,0 +1,8 @@
+User story,Entity or field,Rule,Smallest proof,Open question
+US-1: As a student I want to view all upcoming study sessions,Session (id title project_day time capacity),Must list all 3 seed sessions with available places,GET /sessions returns array of 3 sessions,None (fully specified)
+US-2: As a student I want to view details of a specific session,Session and active bookings list,Returns session metadata and confirmed aliases,GET /sessions/S1 returns details and bookings,None
+US-3: As a student I want to book a place using a fictional alias,Booking (id sessionId alias status),Must not exceed capacity; cannot duplicate active booking,POST /bookings returns 201 Created,None
+US-4: As a system I must reject bookings when capacity is exhausted,Session capacity constraint,The 4th booking on a 3-place session must be rejected,POST /bookings returns 409 Conflict session_full,None
+US-5: As a student I want to cancel my booking and free my place,Booking status set to 'cancelled',Cancelling releases seat immediately back to pool,POST /bookings/:id/cancel returns 200 OK,None
+US-6: As an operator data must survive server restarts,SQLite disk file studyswap.db,Bookings must remain intact after restart,File persistence verified via SQLite query,None
+
