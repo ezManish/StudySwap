@@ -18,7 +18,7 @@ This project has **zero external package dependencies**. It runs natively using 
 
 ```bash
 # 1. Clone repository and enter project directory
-cd internship
+cd StudySwap
 
 # 2. Initialize database and seed initial sessions from data/sessions.csv
 npm run seed
